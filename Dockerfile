@@ -7,7 +7,7 @@ RUN pip install git+https://github.com/colcon/colcon-ros-cargo.git
 
 ARG USERNAME=eku
 ARG PASSWORD=eku
-ARG USERID=1000
+ARG USERID
 ARG HOME=/home/eku
 
 RUN echo 'Create user' \

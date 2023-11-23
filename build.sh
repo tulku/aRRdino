@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker build --build-arg UID=$(id -u) -t eku-humble .
+docker build --build-arg USERID=$(id -u) -t eku-humble .
