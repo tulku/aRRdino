@@ -1,0 +1,9 @@
+# Goal
+geometry_msgs/PoseStamped current
+geometry_msgs/PoseStamped goal
+
+---
+# Result
+nav_msgs/Path path
+---
+# No Feedback
