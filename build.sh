@@ -1,3 +1,3 @@
 #!/usr/bin/env bash
 
-docker build -t eku .
+docker build -t eku-humble .

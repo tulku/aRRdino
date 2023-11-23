@@ -1,6 +1,0 @@
-{
-    "rust-analyzer.linkedProjects": [
-        "/workspace/src/ros2_rust/examples/minimal_pub_sub/Cargo.toml",
-        "/workspace/src/ros2_rust/examples/minimal_client_service/Cargo.toml",
-    ]
-}

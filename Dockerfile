@@ -1,4 +1,4 @@
-FROM ros:rolling-perception
+FROM ros:humble-perception
 RUN apt-get update && \ 
     apt-get install -y build-essential curl git libclang-dev python3-pip python3-vcstool tmux
 
