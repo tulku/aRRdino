@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
-mkdir workspace
-docker run -v ./workspace:/workspace --rm -it eku /bin/bash
+mkdir -p workspace
+docker run -v `pwd`/workspace:/workspace --rm -it eku /bin/bash
