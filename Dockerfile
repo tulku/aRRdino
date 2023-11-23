@@ -1,6 +1,6 @@
-FROM ros:humble-perception
+FROM osrf/ros:humble-desktop-full
 RUN apt-get update && \ 
-    apt-get install -y build-essential curl git libclang-dev python3-pip python3-vcstool tmux
+    apt-get install -y build-essential curl git libclang-dev python3-pip python3-vcstool tmux ros-humble-example-interfaces
 
 RUN pip install git+https://github.com/colcon/colcon-cargo.git
 RUN pip install git+https://github.com/colcon/colcon-ros-cargo.git
@@ -19,6 +19,7 @@ RUN echo 'Create user' \
     && mkdir -p -m 0700 /run/user/${USERID} \
     && chown ${USERNAME}:${USERNAME} /run/user/${USERID}
 
+RUN apt-get install -y ros-humble-navigation2 ros-humble-nav2-bringup
 USER eku
 
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
