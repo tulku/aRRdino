@@ -24,3 +24,4 @@ USER eku
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 RUN echo 'source /home/eku/.cargo/env' >> /home/eku/.bashrc
 RUN . /home/eku/.cargo/env && cargo install --debug cargo-ament-build
+COPY setup.sh /home/eku/setup.sh
