@@ -4,7 +4,7 @@ use futures::task::LocalSpawnExt;
 
 use std::sync::{Arc, Mutex};
 
-use r2r::builtin_interfaces::msg::Time;
+use r2r::geometry_msgs::msg::Point;
 use r2r::geometry_msgs::msg::PointStamped;
 use r2r::geometry_msgs::msg::Pose;
 use r2r::geometry_msgs::msg::PoseStamped;
@@ -13,8 +13,10 @@ use r2r::nav_msgs::msg::Path;
 use r2r::std_msgs::msg::Header;
 use r2r::QosProfile;
 
-use std::time::{SystemTime, UNIX_EPOCH};
 // use r2r::ferret_msgs::action::GetPath;
+
+use std::env;
+use std::path::Path as FilePath;
 
 #[derive(Debug)]
 struct Goal {
@@ -62,22 +64,47 @@ impl Goal {
     }
 }
 
-fn get_path_from_poses(origin: PoseStamped, destination: PoseStamped) -> Path {
-    let start = SystemTime::now()
-        .duration_since(UNIX_EPOCH)
-        .expect("Time went backwards");
-    let secs = start.as_secs();
-    let nanos = start.subsec_nanos();
-    Path {
-        header: Header {
-            stamp: Time {
-                sec: secs as i32,
-                nanosec: nanos,
+fn get_path_from_poses(
+    scene: &ferret::Scene,
+    origin: PoseStamped,
+    destination: PoseStamped,
+) -> Path {
+    let origin_xy = convert_pose_stamped_to_point(&origin);
+    let destination_xy = convert_pose_stamped_to_point(&destination);
+    let path = ferret::calculate_path(scene, &origin_xy, &destination_xy);
+    let header = origin.header;
+    convert_to_ros_path(&path, &header)
+}
+
+fn convert_pose_stamped_to_point(pose_stamped: &PoseStamped) -> Vec<f64> {
+    vec![pose_stamped.pose.position.x, pose_stamped.pose.position.y]
+}
+
+fn convert_to_ros_path(vector: &Vec<Vec<f64>>, header: &Header) -> Path {
+    let mut ros_path = Path {
+        header: header.clone(),
+        poses: vec![],
+    };
+
+    for point_pair in vector {
+        ros_path.poses.push(PoseStamped {
+            header: header.clone(),
+            pose: Pose {
+                position: Point {
+                    x: point_pair[0],
+                    y: point_pair[1],
+                    z: 0.5,
+                },
+                orientation: Quaternion {
+                    x: 0.0,
+                    y: 0.0,
+                    z: 0.0,
+                    w: 1.0,
+                },
             },
-            frame_id: "map".to_string(),
-        },
-        poses: vec![origin, destination],
+        });
     }
+    ros_path
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -125,8 +152,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     })?;
 
-    let publisher = node.create_publisher::<Path>("/get_path", QosProfile::default())?;
+    let file = if env::args().count() == 2 {
+        env::args().nth(1).unwrap()
+    } else {
+        panic!("Please enter a file")
+    };
+    let scene = ferret::Scene::new(FilePath::new(&file));
 
+    let publisher = node.create_publisher::<Path>("/get_path", QosProfile::default())?;
     loop {
         node.spin_once(std::time::Duration::from_millis(100));
         pool.run_until_stalled();
@@ -134,7 +167,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut goal = goal.lock().unwrap();
             let origin = goal.origin.clone().unwrap();
             let destination = goal.destination.clone().unwrap();
-            let path = get_path_from_poses(origin, destination);
+            let path = get_path_from_poses(&scene, origin, destination);
             publisher.publish(&path)?;
             println!("New path sent: {:?}", path);
             goal.sent();
