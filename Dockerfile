@@ -28,4 +28,11 @@ RUN . /home/eku/.cargo/env && cargo install --debug cargo-ament-build
 COPY setup.sh /setup.sh
 RUN mkdir -p ${HOME}/ros_ws/src
 RUN chown -R ${USERNAME}:${USERNAME} ${HOME}/ros_ws
+
+# Env vars for the nvidia-container-runtime.
+ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
+ENV QT_X11_NO_MITSHM 1
+ENV XDG_RUNTIME_DIR=/run/user/${USERID}
+
+
 WORKDIR ${HOME}
